@@ -120,6 +120,41 @@ class Inbox extends BaseController
                          ->with('success', 'Pengajuan berhasil diteruskan ke Kaprodi.');
     }
 
+    /** POST /dashboard/staf-tu/batch-approve */
+    public function batchApprove()
+    {
+        $ids = (array) $this->request->getPost('ids');
+        if (empty($ids)) {
+            return redirect()->to('/dashboard/staf-tu/inbox')->with('error', 'Tidak ada pengajuan yang dipilih.');
+        }
+
+        $count = 0;
+        foreach ($ids as $id) {
+            $pengajuan = $this->model->getDetailWithLogs($id);
+            if ($pengajuan && $pengajuan['status'] === 'MENUNGGU_TU') {
+                $this->model->approve(
+                    $id,
+                    session('user_id'),
+                    session('nama'),
+                    'STAF_TU_PRODI',
+                    'MENUNGGU_KAPRODI',
+                    'Batch approval otomatis diverifikasi oleh Staf TU'
+                );
+
+                $this->model->notifMahasiswa(
+                    $pengajuan['mahasiswa_id'],
+                    'Pengajuan Diverifikasi Staf TU',
+                    'Pengajuan ' . $pengajuan['jenis_surat'] . ' kamu telah diverifikasi dan diteruskan ke Kaprodi.',
+                    $id
+                );
+                $count++;
+            }
+        }
+
+        return redirect()->to('/dashboard/staf-tu/inbox')
+                         ->with('success', $count . ' pengajuan berhasil diverifikasi dan diteruskan ke Kaprodi.');
+    }
+
     /** POST /dashboard/staf-tu/tolak/{id} */
     public function tolak(string $id)
     {

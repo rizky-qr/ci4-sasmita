@@ -17,6 +17,9 @@ $bc = badgeClass($p['status']);
     <span style="color:var(--text);font-weight:600">Detail Pengajuan</span>
 </div>
 
+<!-- Visual Step Progress Bar -->
+<?= renderStepper($p['status']) ?>
+
 <div style="display:grid;grid-template-columns:1fr 340px;gap:1.25rem;align-items:start">
 
     <!-- Kiri: Info Pengajuan -->
@@ -91,6 +94,27 @@ $bc = badgeClass($p['status']);
                         <?= nl2br(esc($p['keperluan'])) ?>
                     </div>
                 </div>
+
+                <?php if (!empty($p['file_lampiran'])): ?>
+                <div style="grid-column:1/-1">
+                    <div style="color:var(--muted);font-size:.74rem;font-weight:600;margin-bottom:.2rem">Lampiran Pendukung</div>
+                    <div style="display:flex;align-items:center;justify-content:space-between;gap:.75rem;background:#f8fafc;padding:.75rem 1rem;border-radius:8px;border:1px solid var(--border);">
+                        <div style="display:flex;align-items:center;gap:.6rem;min-width:0;">
+                            <span style="font-size:1.3rem;">📎</span>
+                            <div style="min-width:0;">
+                                <div style="font-size:.84rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:320px;">
+                                    <?= esc($p['file_lampiran']) ?>
+                                </div>
+                                <div style="font-size:.72rem;color:var(--muted)">Lampiran berkas pendukung</div>
+                            </div>
+                        </div>
+                        <a href="/uploads/lampiran/<?= esc($p['file_lampiran']) ?>" target="_blank" class="btn btn-outline btn-sm">
+                            👁️ Buka Berkas
+                        </a>
+                    </div>
+                </div>
+                <?php endif ?>
+
                 <?php if ($p['catatan_terakhir'] && $p['status'] !== 'BUTUH_REVISI'): ?>
                 <div style="grid-column:1/-1">
                     <div style="color:var(--muted);font-size:.74rem;font-weight:600;margin-bottom:.2rem">Catatan Terakhir Approver</div>
@@ -101,15 +125,29 @@ $bc = badgeClass($p['status']);
                 <?php endif ?>
             </div>
 
-            <!-- Tombol Aksi Dokumen Selesai -->
+            <!-- Tombol Aksi Dokumen Selesai & 1-Click Copy Verifikasi -->
             <?php if ($p['status'] === 'SELESAI'): ?>
             <div style="margin-top:1.5rem;padding-top:1.25rem;border-top:1px solid var(--border);display:flex;gap:.75rem;flex-wrap:wrap;">
                 <a href="/surat/cetak/<?= esc($p['verify_token'] ?: $p['id']) ?>" class="btn btn-primary" target="_blank">
                     📄 Cetak / Simpan Surat Resmi (PDF)
                 </a>
                 <a href="/verify/<?= esc($p['verify_token'] ?: $p['id']) ?>" class="btn btn-outline" target="_blank">
-                    🔍 Verifikasi QR Dokumen
+                    🔍 Cek Verifikasi QR
                 </a>
+            </div>
+
+            <!-- 1-Click Copy Verifikasi Link Box -->
+            <div class="verif-copy-box" style="margin-top:1.25rem; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:10px; padding:1rem; display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap;">
+                <div style="display:flex; align-items:center; gap:.75rem; min-width:0; flex:1;">
+                    <div style="font-size:1.5rem; flex-shrink:0;">🔗</div>
+                    <div style="min-width:0; flex:1;">
+                        <div style="font-size:.74rem; font-weight:700; color:#15803d; text-transform:uppercase; letter-spacing:0.5px;">Link Verifikasi Resmi</div>
+                        <div style="font-size:.82rem; color:#166534; font-family:monospace; word-break:break-all;" id="verif-url-text"><?= esc(site_url('verify/' . ($p['verify_token'] ?: $p['id']))) ?></div>
+                    </div>
+                </div>
+                <button type="button" class="btn btn-primary btn-sm" onclick="copyVerifLink()" id="btn-copy-verif" style="display:inline-flex; align-items:center; gap:.4rem; font-weight:600; white-space:nowrap;">
+                    <span>📋</span> <span id="copy-text">Salin Link</span>
+                </button>
             </div>
             <?php endif ?>
         </div>
@@ -151,4 +189,32 @@ $bc = badgeClass($p['status']);
 
 <?php
 $pageContent = ob_get_clean();
+$extraScript = '
+<script>
+function copyVerifLink() {
+    const text = document.getElementById("verif-url-text").innerText.trim();
+    if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text).then(function() {
+            triggerCopySuccess();
+        }).catch(function() {
+            fallbackCopy(text);
+        });
+    } else {
+        fallbackCopy(text);
+    }
+}
+function triggerCopySuccess() {
+    const btn = document.getElementById("btn-copy-verif");
+    const span = document.getElementById("copy-text");
+    span.innerText = "Tersalin! ✓";
+    btn.style.backgroundColor = "#15803d";
+    setTimeout(function() {
+        span.innerText = "Salin Link";
+        btn.style.backgroundColor = "";
+    }, 2500);
+}
+function fallbackCopy(text) {
+    prompt("Salin URL Verifikasi Dokumen:", text);
+}
+</script>';
 require APPPATH . 'Views/layouts/main.php';

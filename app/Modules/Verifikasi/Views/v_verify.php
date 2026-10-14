@@ -309,6 +309,15 @@
                         <div class="token-box"><?= esc($pengajuan['verify_token']) ?></div>
                     </td>
                 </tr>
+                <tr>
+                    <td class="label">Audit Pemindaian</td>
+                    <td class="value">
+                        <div style="display:flex;align-items:center;gap:.5rem;font-size:.82rem;color:var(--text);font-weight:600;">
+                            <span>👁️</span> Dokumen telah diverifikasi <strong><?= esc($totalScan ?? 1) ?> kali</strong>
+                            <span style="color:var(--muted);font-size:.74rem;font-weight:normal;">(Terakhir: <?= date('d M Y, H:i') ?> WIB)</span>
+                        </div>
+                    </td>
+                </tr>
             </table>
 
             <a href="/surat/cetak/<?= esc($pengajuan['verify_token']) ?>" class="btn-action" target="_blank">

@@ -85,6 +85,21 @@ class Pengajuan extends BaseController
         $jenis = $this->request->getPost('jenis_surat');
         $id    = $this->generateUUID();
 
+        // Handle upload file lampiran pendukung jika ada
+        $fileLampiran = $this->request->getFile('file_lampiran');
+        $lampiranName = null;
+        if ($fileLampiran && $fileLampiran->isValid() && ! $fileLampiran->hasMoved()) {
+            $ext = strtolower($fileLampiran->getClientExtension());
+            if (in_array($ext, ['pdf', 'jpg', 'jpeg', 'png']) && $fileLampiran->getSize() <= 2097152) {
+                $lampiranName = $fileLampiran->getRandomName();
+                $targetDir = FCPATH . 'uploads/lampiran';
+                if (! is_dir($targetDir)) {
+                    @mkdir($targetDir, 0777, true);
+                }
+                $fileLampiran->move($targetDir, $lampiranName);
+            }
+        }
+
         $this->model->insert([
             'id'                 => $id,
             'mahasiswa_id'       => $user['user_id'],
@@ -94,6 +109,7 @@ class Pengajuan extends BaseController
             'jenis_surat'        => $jenis,
             'status'             => 'MENUNGGU_TU',
             'keperluan'          => $this->request->getPost('keperluan'),
+            'file_lampiran'      => $lampiranName,
         ]);
 
         // Buat notifikasi untuk diri sendiri

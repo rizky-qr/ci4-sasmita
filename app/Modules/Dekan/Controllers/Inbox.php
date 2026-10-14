@@ -76,7 +76,41 @@ class Inbox extends BaseController
             $id
         );
 
+        // Kirim otomatis ke Email Mahasiswa
+        \App\Services\EmailNotificationService::sendLetterCompletedEmail($pengajuan, $nomor, $verifyToken);
+
         return redirect()->to('/dashboard/dekan/inbox')->with('success', 'Surat berhasil disahkan. Nomor: ' . $nomor);
+    }
+
+    /** POST /dashboard/dekan/batch-approve */
+    public function batchApprove()
+    {
+        $ids = (array) $this->request->getPost('ids');
+        if (empty($ids)) {
+            return redirect()->to('/dashboard/dekan/inbox')->with('error', 'Tidak ada pengajuan yang dipilih.');
+        }
+
+        $count = 0;
+        foreach ($ids as $id) {
+            $pengajuan = $this->model->getDetailWithLogs($id);
+            if ($pengajuan && $pengajuan['status'] === 'MENUNGGU_DEKAN') {
+                $nomor       = \App\Services\NumberingService::generate($pengajuan['jenis_surat']);
+                $verifyToken = $pengajuan['verify_token'] ?: \App\Services\NumberingService::generateVerifyToken();
+
+                $this->model->selesaikan($id, session('user_id'), session('nama'), $nomor, null, $verifyToken);
+                $this->model->notifMahasiswa(
+                    $pengajuan['mahasiswa_id'],
+                    '🎉 Surat Siap Diunduh',
+                    'Surat ' . str_replace('_', ' ', $pengajuan['jenis_surat']) . ' No. ' . $nomor . ' telah disahkan Dekan dan siap diunduh.',
+                    $id
+                );
+
+                \App\Services\EmailNotificationService::sendLetterCompletedEmail($pengajuan, $nomor, $verifyToken);
+                $count++;
+            }
+        }
+
+        return redirect()->to('/dashboard/dekan/inbox')->with('success', $count . ' pengajuan berhasil disahkan dan diterbitkan.');
     }
 
     public function tolak(string $id)

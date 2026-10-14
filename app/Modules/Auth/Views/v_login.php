@@ -445,6 +445,10 @@
             </button>
         </div>
         <p class="demo-hint">Klik tombol role di atas untuk isi otomatis akun testing</p>
+
+        <div style="text-align: center; margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.1); font-size: .84rem; color: rgba(255,255,255,0.75);">
+            Belum memiliki akun mahasiswa? <a href="/register" style="color: #fbbf24; font-weight: 700; text-decoration: none;">Daftar di sini</a>
+        </div>
     </div>
 
     <p class="footer-credit">

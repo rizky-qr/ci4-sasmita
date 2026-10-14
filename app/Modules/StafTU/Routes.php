@@ -9,6 +9,7 @@ $routes->group('dashboard/staf-tu', [
     $routes->get('inbox',                   'Inbox::index');
     $routes->get('detail/(:segment)',       'Inbox::detail/$1');
     $routes->post('approve/(:segment)',     'Inbox::approve/$1');
+    $routes->post('batch-approve',          'Inbox::batchApprove');
     $routes->post('tolak/(:segment)',       'Inbox::tolak/$1');
     $routes->post('revisi/(:segment)',      'Inbox::revisi/$1');
     $routes->get('diproses',               'Inbox::diproses');

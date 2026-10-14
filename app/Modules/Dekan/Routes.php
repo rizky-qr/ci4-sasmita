@@ -9,8 +9,10 @@ $routes->group('dashboard/dekan', [
     $routes->get('inbox',                   'Inbox::index');
     $routes->get('detail/(:segment)',       'Inbox::detail/$1');
     $routes->post('setujui/(:segment)',     'Inbox::setujui/$1');
+    $routes->post('batch-approve',          'Inbox::batchApprove');
     $routes->post('tolak/(:segment)',       'Inbox::tolak/$1');
     $routes->get('selesai',                'Inbox::selesai');
     $routes->get('riwayat',                'Inbox::selesai');
     $routes->get('laporan',                'Laporan::index');
+    $routes->get('export',                 'Laporan::export');
 });

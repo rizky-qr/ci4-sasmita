@@ -48,3 +48,88 @@ if (! function_exists('badgeClass')) {
         return $map[$status] ?? 'badge-draft';
     }
 }
+
+if (! function_exists('slaBadge')) {
+    function slaBadge(string $createdAt): string
+    {
+        $now = time();
+        $created = strtotime($createdAt);
+        $diffHours = max(0, ($now - $created) / 3600);
+
+        if ($diffHours < 24) {
+            return '<span class="sla-badge sla-green" title="Diajukan ' . round($diffHours, 1) . ' jam lalu (SLA Aman)"><span class="sla-dot">●</span> &lt; 24 jam</span>';
+        } elseif ($diffHours <= 48) {
+            return '<span class="sla-badge sla-yellow" title="Diajukan ' . round($diffHours, 1) . ' jam lalu (Perhatian)"><span class="sla-dot">●</span> 1-2 hari</span>';
+        } else {
+            $days = floor($diffHours / 24);
+            return '<span class="sla-badge sla-red" title="Diajukan ' . $days . ' hari lalu (Perlu Tindakan Cepat)"><span class="sla-dot">●</span> &gt; 2 hari</span>';
+        }
+    }
+}
+
+if (! function_exists('renderStepper')) {
+    function renderStepper(string $status): string
+    {
+        $steps = [
+            1 => ['title' => 'Diajukan', 'role' => 'Mahasiswa', 'icon' => '📝'],
+            2 => ['title' => 'Verifikasi TU', 'role' => 'Staf TU', 'icon' => '🔍'],
+            3 => ['title' => 'Persetujuan', 'role' => 'Kaprodi', 'icon' => '🎓'],
+            4 => ['title' => 'Pengesahan', 'role' => 'Dekan', 'icon' => '🏛️'],
+            5 => ['title' => 'Selesai Terbit', 'role' => 'Dokumen Sah', 'icon' => '📜'],
+        ];
+
+        // Tentukan state per step: 'completed', 'active', 'revisi', 'rejected', 'pending'
+        $state = [1 => 'pending', 2 => 'pending', 3 => 'pending', 4 => 'pending', 5 => 'pending'];
+
+        if ($status === 'MENUNGGU_TU' || $status === 'DIAJUKAN' || $status === 'DRAFT') {
+            $state[1] = 'completed';
+            $state[2] = 'active';
+        } elseif ($status === 'MENUNGGU_KAPRODI') {
+            $state[1] = 'completed';
+            $state[2] = 'completed';
+            $state[3] = 'active';
+        } elseif ($status === 'MENUNGGU_DEKAN') {
+            $state[1] = 'completed';
+            $state[2] = 'completed';
+            $state[3] = 'completed';
+            $state[4] = 'active';
+        } elseif ($status === 'SELESAI' || $status === 'DISETUJUI') {
+            $state[1] = 'completed';
+            $state[2] = 'completed';
+            $state[3] = 'completed';
+            $state[4] = 'completed';
+            $state[5] = 'completed';
+        } elseif ($status === 'BUTUH_REVISI') {
+            $state[1] = 'completed';
+            $state[2] = 'revisi';
+        } elseif ($status === 'DITOLAK') {
+            $state[1] = 'completed';
+            $state[2] = 'rejected';
+        }
+
+        $html = '<div class="stepper-container">';
+        $count = count($steps);
+        foreach ($steps as $idx => $step) {
+            $s = $state[$idx];
+            $icon = $step['icon'];
+            if ($s === 'completed') $icon = '✓';
+            elseif ($s === 'revisi') $icon = '⚠️';
+            elseif ($s === 'rejected') $icon = '✕';
+
+            $html .= '<div class="step-item ' . $s . '">';
+            $html .= '  <div class="step-circle">' . $icon . '</div>';
+            $html .= '  <div class="step-info">';
+            $html .= '      <div class="step-title">' . esc($step['title']) . '</div>';
+            $html .= '      <div class="step-role">' . esc($step['role']) . '</div>';
+            $html .= '  </div>';
+            if ($idx < $count) {
+                $lineClass = ($s === 'completed' && in_array($state[$idx+1], ['completed', 'active', 'revisi', 'rejected'])) ? 'line-completed' : '';
+                $html .= '  <div class="step-connector ' . $lineClass . '"></div>';
+            }
+            $html .= '</div>';
+        }
+        $html .= '</div>';
+
+        return $html;
+    }
+}

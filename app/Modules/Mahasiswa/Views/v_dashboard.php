@@ -1,48 +1,7 @@
 <?php
-// Sidebar navigasi khusus mahasiswa
-$sidebarNav = '
-<span class="nav-section-label">Menu</span>
-<a href="/dashboard/mahasiswa" class="nav-item ' . (uri_string() === 'dashboard/mahasiswa' ? 'active' : '') . '">
-    <span class="nav-icon">🏠</span> Dashboard
-</a>
-<span class="nav-section-label">Pengajuan Surat</span>
-<a href="/dashboard/mahasiswa/pengajuan/aktif" class="nav-item ' . (strpos(uri_string(), 'pengajuan/aktif') !== false ? 'active' : '') . '">
-    <span class="nav-icon">📋</span> Keterangan Aktif
-</a>
-<a href="/dashboard/mahasiswa/pengajuan/tidak-kuliah" class="nav-item ' . (strpos(uri_string(), 'tidak-kuliah') !== false ? 'active' : '') . '">
-    <span class="nav-icon">📋</span> Tidak Ada Kuliah
-</a>
-<a href="/dashboard/mahasiswa/pengajuan/penelitian" class="nav-item ' . (strpos(uri_string(), 'penelitian') !== false ? 'active' : '') . '">
-    <span class="nav-icon">🔬</span> Izin Penelitian
-</a>
-<a href="/dashboard/mahasiswa/pengajuan/plp-magang" class="nav-item ' . (strpos(uri_string(), 'plp-magang') !== false ? 'active' : '') . '">
-    <span class="nav-icon">🏢</span> PLP / Magang
-</a>
-<a href="/dashboard/mahasiswa/pengajuan/observasi" class="nav-item ' . (strpos(uri_string(), 'observasi') !== false ? 'active' : '') . '">
-    <span class="nav-icon">👁️</span> Observasi
-</a>
-<a href="/dashboard/mahasiswa/pengajuan/rekomendasi" class="nav-item ' . (strpos(uri_string(), 'rekomendasi') !== false ? 'active' : '') . '">
-    <span class="nav-icon">⭐</span> Rekomendasi
-</a>
-<a href="/dashboard/mahasiswa/pengajuan/lulus" class="nav-item ' . (strpos(uri_string(), 'lulus') !== false ? 'active' : '') . '">
-    <span class="nav-icon">🎓</span> Keterangan Lulus
-</a>
-<span class="nav-section-label">Riwayat</span>
-<a href="/dashboard/mahasiswa/riwayat" class="nav-item ' . (strpos(uri_string(), 'riwayat') !== false ? 'active' : '') . '">
-    <span class="nav-icon">📂</span> Riwayat Pengajuan
-</a>
-<a href="/dashboard/mahasiswa/notifikasi" class="nav-item ' . (strpos(uri_string(), 'notifikasi') !== false ? 'active' : '') . '">
-    <span class="nav-icon">🔔</span> Notifikasi
-</a>
-<span class="nav-section-label">Akun</span>
-<a href="/user/profile" class="nav-item">
-    <span class="nav-icon">👤</span> Profil Saya
-</a>
-';
-
 $notifUrl = '/dashboard/mahasiswa/notifikasi';
 
-require APPPATH . 'Views/partials/status_helpers.php';
+require_once APPPATH . 'Views/partials/status_helpers.php';
 
 $jenisLabel = $jenisLabel ?? [
     'KETERANGAN_AKTIF'      => 'Surat Keterangan Aktif',
@@ -54,89 +13,156 @@ $jenisLabel = $jenisLabel ?? [
     'KETERANGAN_LULUS'      => 'Surat Keterangan Lulus',
 ];
 
-$pageContent = '
+// Cari pengajuan aktif berjalan untuk Stepper Dashboard
+$activePengajuan = null;
+foreach ($terbaru as $p) {
+    if (in_array($p['status'], ['MENUNGGU_TU', 'MENUNGGU_KAPRODI', 'MENUNGGU_DEKAN', 'BUTUH_REVISI', 'DRAFT'])) {
+        $activePengajuan = $p;
+        break;
+    }
+}
+
+ob_start();
+?>
+
+<!-- Stat Cards -->
 <div class="stats-grid">
-    <div class="stat-card" style="--stat-color:#6366f1">
+    <div class="stat-card" style="--stat-color:#1b5e20">
         <div class="stat-icon">📊</div>
-        <div class="stat-value">' . ($stats['total'] ?? 0) . '</div>
+        <div class="stat-value"><?= (int) ($stats['total'] ?? 0) ?></div>
         <div class="stat-label">Total Pengajuan</div>
     </div>
-    <div class="stat-card" style="--stat-color:#fbbf24">
+    <div class="stat-card" style="--stat-color:#f9a825">
         <div class="stat-icon">⏳</div>
-        <div class="stat-value">' . ($stats['menunggu'] ?? 0) . '</div>
+        <div class="stat-value"><?= (int) ($stats['menunggu'] ?? 0) ?></div>
         <div class="stat-label">Sedang Diproses</div>
     </div>
-    <div class="stat-card" style="--stat-color:#34d399">
+    <div class="stat-card" style="--stat-color:#16a34a">
         <div class="stat-icon">✅</div>
-        <div class="stat-value">' . ($stats['selesai'] ?? 0) . '</div>
-        <div class="stat-label">Selesai</div>
+        <div class="stat-value"><?= (int) ($stats['selesai'] ?? 0) ?></div>
+        <div class="stat-label">Selesai & Sah</div>
     </div>
-    <div class="stat-card" style="--stat-color:#f87171">
+    <div class="stat-card" style="--stat-color:#dc2626">
         <div class="stat-icon">❌</div>
-        <div class="stat-value">' . ($stats['ditolak'] ?? 0) . '</div>
+        <div class="stat-value"><?= (int) ($stats['ditolak'] ?? 0) ?></div>
         <div class="stat-label">Ditolak</div>
     </div>
 </div>
 
-<div class="card">
+<?php if ($activePengajuan): ?>
+<!-- Kartu Pelacak Alur Berjalan (Stepper di Dashboard) -->
+<div class="card" style="margin-top:1.25rem;border-left:4px solid var(--primary);">
+    <div class="card-header" style="padding-bottom:.5rem;">
+        <div>
+            <div style="font-size:.74rem;color:var(--primary);font-weight:700;text-transform:uppercase;letter-spacing:.5px;">Alur Pengajuan Terkini</div>
+            <div class="card-title" style="font-size:1.05rem;margin-top:2px;">
+                <?= esc($jenisLabel[$activePengajuan['jenis_surat']] ?? str_replace('_', ' ', $activePengajuan['jenis_surat'])) ?>
+            </div>
+            <div class="card-sub">Diajukan pada <?= date('d M Y, H:i', strtotime($activePengajuan['created_at'])) ?></div>
+        </div>
+        <a href="/dashboard/mahasiswa/riwayat/<?= esc($activePengajuan['id']) ?>" class="btn btn-outline btn-sm">
+            Lihat Detail &raquo;
+        </a>
+    </div>
+
+    <!-- Stepper Komponen -->
+    <?= renderStepper($activePengajuan['status']) ?>
+
+    <?php if ($activePengajuan['status'] === 'BUTUH_REVISI'): ?>
+    <div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;padding:.75rem 1rem;display:flex;justify-content:space-between;align-items:center;margin-top:.5rem;">
+        <div style="font-size:.82rem;color:#c2410c;font-weight:600;">
+            ⚠️ Pengajuan membutuhkan perbaikan data dari Anda.
+        </div>
+        <a href="/dashboard/mahasiswa/riwayat/<?= esc($activePengajuan['id']) ?>" class="btn btn-warning btn-sm" style="font-weight:700;">
+            Perbaiki Sekarang
+        </a>
+    </div>
+    <?php endif ?>
+</div>
+<?php endif ?>
+
+<!-- Pengajuan Terbaru -->
+<div class="card" style="margin-top:1.25rem">
     <div class="card-header">
         <div>
-            <div class="card-title">Pengajuan Terbaru</div>
-            <div class="card-sub">5 pengajuan terakhir kamu</div>
+            <div class="card-title">Pengajuan Terakhir</div>
+            <div class="card-sub">5 permohonan surat terbaru kamu</div>
         </div>
-        <a href="/dashboard/mahasiswa/riwayat" class="btn btn-outline btn-sm">Lihat Semua</a>
+        <a href="/dashboard/mahasiswa/riwayat" class="btn btn-outline btn-sm">Lihat Semua Riwayat</a>
     </div>
-    <div class="table-wrapper">
-        ' . (empty($terbaru) ? '
+
+    <?php if (empty($terbaru)): ?>
         <div class="empty-state">
             <div class="empty-icon">📭</div>
             <div class="empty-title">Belum ada pengajuan</div>
-            <div class="empty-sub">Pilih jenis surat di menu kiri untuk mengajukan surat.</div>
+            <div class="empty-sub">Pilih salah satu layanan surat di bawah untuk memulai pengajuan baru.</div>
         </div>
-        ' : '
-        <table>
-            <thead>
-                <tr>
-                    <th>Jenis Surat</th>
-                    <th>Tanggal</th>
-                    <th>Status</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                ' . implode('', array_map(function($p) use ($jenisLabel) {
-                    $label   = $jenisLabel[$p['jenis_surat']] ?? $p['jenis_surat'];
-                    $tgl     = date('d M Y', strtotime($p['created_at']));
-                    $badge   = statusBadge($p['status']);
-                    return "<tr>
-                        <td>{$label}</td>
-                        <td style='color:var(--muted)'>{$tgl}</td>
-                        <td>{$badge}</td>
-                        <td><a href='/dashboard/mahasiswa/riwayat/{$p['id']}' class='btn btn-outline btn-sm'>Detail</a></td>
-                    </tr>";
-                }, $terbaru ?? [])) . '
-            </tbody>
-        </table>
-        ') . '
-    </div>
+    <?php else: ?>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Jenis Surat</th>
+                        <th>Tanggal</th>
+                        <th>Status</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($terbaru as $p): ?>
+                    <tr>
+                        <td style="font-weight:600;color:var(--text-dark)"><?= esc($jenisLabel[$p['jenis_surat']] ?? str_replace('_', ' ', $p['jenis_surat'])) ?></td>
+                        <td style="color:var(--muted);white-space:nowrap"><?= date('d M Y, H:i', strtotime($p['created_at'])) ?></td>
+                        <td><?= statusBadge($p['status']) ?></td>
+                        <td>
+                            <div style="display:flex;gap:.4rem;">
+                                <a href="/dashboard/mahasiswa/riwayat/<?= esc($p['id']) ?>" class="btn btn-outline btn-sm">Detail</a>
+                                <?php if ($p['status'] === 'SELESAI'): ?>
+                                    <a href="/surat/cetak/<?= esc($p['verify_token'] ?: $p['id']) ?>" class="btn btn-sm btn-primary" target="_blank">📄 Cetak</a>
+                                <?php endif ?>
+                            </div>
+                        </td>
+                    </tr>
+                    <?php endforeach ?>
+                </tbody>
+            </table>
+        </div>
+    <?php endif ?>
 </div>
 
-<div class="card" style="margin-top:1rem">
+<!-- Layanan Ajukan Surat Cepat -->
+<div class="card" style="margin-top:1.25rem">
     <div class="card-header">
-        <div class="card-title">Ajukan Surat Baru</div>
+        <div>
+            <div class="card-title">⚡ Ajukan Surat Baru</div>
+            <div class="card-sub">Pilih jenis persuratan administrasi akademik FKIP UIKA</div>
+        </div>
     </div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:.75rem">
-        <a href="/dashboard/mahasiswa/pengajuan/aktif" class="btn btn-outline" style="justify-content:center;padding:.75rem">📋 Keterangan Aktif</a>
-        <a href="/dashboard/mahasiswa/pengajuan/tidak-kuliah" class="btn btn-outline" style="justify-content:center;padding:.75rem">📋 Tidak Ada Kuliah</a>
-        <a href="/dashboard/mahasiswa/pengajuan/penelitian" class="btn btn-outline" style="justify-content:center;padding:.75rem">🔬 Penelitian</a>
-        <a href="/dashboard/mahasiswa/pengajuan/plp-magang" class="btn btn-outline" style="justify-content:center;padding:.75rem">🏢 PLP/Magang</a>
-        <a href="/dashboard/mahasiswa/pengajuan/observasi" class="btn btn-outline" style="justify-content:center;padding:.75rem">👁️ Observasi</a>
-        <a href="/dashboard/mahasiswa/pengajuan/rekomendasi" class="btn btn-outline" style="justify-content:center;padding:.75rem">⭐ Rekomendasi</a>
-        <a href="/dashboard/mahasiswa/pengajuan/lulus" class="btn btn-outline" style="justify-content:center;padding:.75rem">🎓 Ket. Lulus</a>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:.85rem">
+        <a href="/dashboard/mahasiswa/pengajuan/aktif" class="btn btn-outline" style="justify-content:flex-start;padding:.85rem 1rem;">
+            <span>📋</span> Keterangan Aktif
+        </a>
+        <a href="/dashboard/mahasiswa/pengajuan/tidak-kuliah" class="btn btn-outline" style="justify-content:flex-start;padding:.85rem 1rem;">
+            <span>📋</span> Tidak Ada Kuliah
+        </a>
+        <a href="/dashboard/mahasiswa/pengajuan/penelitian" class="btn btn-outline" style="justify-content:flex-start;padding:.85rem 1rem;">
+            <span>🔬</span> Izin Penelitian
+        </a>
+        <a href="/dashboard/mahasiswa/pengajuan/plp-magang" class="btn btn-outline" style="justify-content:flex-start;padding:.85rem 1rem;">
+            <span>🏢</span> PLP / Magang
+        </a>
+        <a href="/dashboard/mahasiswa/pengajuan/observasi" class="btn btn-outline" style="justify-content:flex-start;padding:.85rem 1rem;">
+            <span>👁️</span> Observasi Matkul
+        </a>
+        <a href="/dashboard/mahasiswa/pengajuan/rekomendasi" class="btn btn-outline" style="justify-content:flex-start;padding:.85rem 1rem;">
+            <span>⭐</span> Rekomendasi
+        </a>
+        <a href="/dashboard/mahasiswa/pengajuan/lulus" class="btn btn-outline" style="justify-content:flex-start;padding:.85rem 1rem;">
+            <span>🎓</span> Keterangan Lulus
+        </a>
     </div>
 </div>
-';
 
-// Render layout
-extract(['jenisLabel' => $jenisLabel]);
+<?php
+$pageContent = ob_get_clean();
 require APPPATH . 'Views/layouts/main.php';

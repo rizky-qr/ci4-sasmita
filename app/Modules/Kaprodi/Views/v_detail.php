@@ -24,6 +24,9 @@ ob_start();
     <span style="color:var(--text);font-weight:600">Detail Pengajuan</span>
 </div>
 
+<!-- Visual Step Progress Bar -->
+<?= renderStepper($p['status']) ?>
+
 <div style="display:grid;grid-template-columns:1fr 340px;gap:1.25rem;align-items:start">
 
     <!-- Kiri: Info pengajuan -->
@@ -61,6 +64,27 @@ ob_start();
                         <?= nl2br(esc($p['keperluan'])) ?>
                     </div>
                 </div>
+
+                <?php if (!empty($p['file_lampiran'])): ?>
+                <div style="grid-column:1/-1">
+                    <div style="color:var(--muted);font-size:.74rem;font-weight:600;margin-bottom:.2rem">Lampiran Pendukung Mahasiswa</div>
+                    <div style="display:flex;align-items:center;justify-content:space-between;gap:.75rem;background:#f8fafc;padding:.75rem 1rem;border-radius:8px;border:1px solid var(--border);">
+                        <div style="display:flex;align-items:center;gap:.6rem;min-width:0;">
+                            <span style="font-size:1.3rem;">📎</span>
+                            <div style="min-width:0;">
+                                <div style="font-size:.84rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:320px;">
+                                    <?= esc($p['file_lampiran']) ?>
+                                </div>
+                                <div style="font-size:.72rem;color:var(--muted)">Lampiran berkas pendukung</div>
+                            </div>
+                        </div>
+                        <a href="/uploads/lampiran/<?= esc($p['file_lampiran']) ?>" target="_blank" class="btn btn-outline btn-sm">
+                            👁️ Buka Berkas
+                        </a>
+                    </div>
+                </div>
+                <?php endif ?>
+
                 <?php if (!empty($p['nomor_surat'])): ?>
                 <div style="grid-column:1/-1">
                     <div style="color:var(--muted);font-size:.74rem;font-weight:600;margin-bottom:.2rem">Nomor Surat Resmi</div>

@@ -271,6 +271,47 @@
             text-decoration: underline;
         }
 
+        /* ── Dynamic Anti-Tamper Security Watermark ── */
+        .anti-tamper-watermark {
+            position: absolute;
+            top: 52%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-32deg);
+            width: 85%;
+            text-align: center;
+            pointer-events: none;
+            user-select: none;
+            z-index: 0;
+            opacity: 0.055;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border: 4px dashed #144218;
+            padding: 2.5rem 1.5rem;
+            border-radius: 20px;
+        }
+
+        .anti-tamper-watermark .seal-title {
+            font-size: 32pt;
+            font-weight: 900;
+            letter-spacing: 5px;
+            color: #144218;
+            font-family: 'Times New Roman', serif;
+            text-transform: uppercase;
+            line-height: 1.1;
+        }
+
+        .anti-tamper-watermark .seal-sub {
+            font-size: 11pt;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: #144218;
+            margin-top: 6px;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            text-transform: uppercase;
+        }
+
         /* ── Print Media Query ── */
         @media print {
             body {
@@ -287,6 +328,11 @@
                 min-height: auto;
                 padding: 15mm 20mm;
             }
+            .anti-tamper-watermark {
+                opacity: 0.06 !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
         }
     </style>
 </head>
@@ -300,6 +346,12 @@
 </div>
 
 <div class="page">
+    <!-- Dynamic Anti-Tamper Security Watermark Seal -->
+    <div class="anti-tamper-watermark">
+        <div class="seal-title">SASMITA FKIP UIKA</div>
+        <div class="seal-sub">DOKUMEN RESMI SAH &bull; NIM: <?= esc($pengajuan['mahasiswa_nim']) ?> &bull; <?= date('Y') ?></div>
+    </div>
+
     <!-- Kop Surat -->
     <table class="kop-table">
         <tr>

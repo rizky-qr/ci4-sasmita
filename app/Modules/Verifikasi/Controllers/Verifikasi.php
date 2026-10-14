@@ -25,12 +25,29 @@ class Verifikasi extends BaseController
 
         // Ambil riwayat log pengesahan
         $logs = [];
+        $totalScan = 0;
         if ($pengajuan) {
             $logs = $db->table('approval_logs')
                 ->where('pengajuan_id', $pengajuan['id'])
                 ->orderBy('created_at', 'ASC')
                 ->get()
                 ->getResultArray();
+
+            // Audit log pemindaian QR Code
+            try {
+                $db->table('verify_logs')->insert([
+                    'pengajuan_id' => $pengajuan['id'],
+                    'ip_address'   => $this->request->getIPAddress(),
+                    'user_agent'   => substr((string) $this->request->getUserAgent(), 0, 255),
+                    'scanned_at'   => date('Y-m-d H:i:s'),
+                ]);
+
+                $db->table('pengajuan_surat')->where('id', $pengajuan['id'])->increment('scan_count', 1);
+                $db->table('pengajuan_surat')->where('id', $pengajuan['id'])->update(['last_scanned_at' => date('Y-m-d H:i:s')]);
+                $totalScan = (int) ($pengajuan['scan_count'] ?? 0) + 1;
+            } catch (\Throwable $e) {
+                $totalScan = (int) ($pengajuan['scan_count'] ?? 1);
+            }
         }
 
         return view('App\Modules\Verifikasi\Views\v_verify', [
@@ -38,6 +55,7 @@ class Verifikasi extends BaseController
             'pengajuan' => $pengajuan,
             'logs'      => $logs,
             'isValid'   => ($pengajuan && in_array($pengajuan['status'], ['DISETUJUI', 'SELESAI'])),
+            'totalScan' => $totalScan,
         ]);
     }
 

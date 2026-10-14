@@ -18,10 +18,10 @@ class M_pengajuan extends Model
     protected $useSoftDeletes   = false;
 
     protected $allowedFields = [
-        'id', 'nomor_surat', 'verify_token', 'mahasiswa_id', 'mahasiswa_nama',
-        'mahasiswa_nim', 'mahasiswa_program', 'jenis_surat',
-        'status', 'keperluan', 'catatan_terakhir', 'tanggal_disetujui',
-        'surat_url', 'file_pdf', 'email_terkirim',
+        'id', 'nomor_surat', 'verify_token', 'scan_count', 'last_scanned_at',
+        'mahasiswa_id', 'mahasiswa_nama', 'mahasiswa_nim', 'mahasiswa_program',
+        'jenis_surat', 'status', 'keperluan', 'file_lampiran', 'catatan_terakhir',
+        'tanggal_disetujui', 'surat_url', 'file_pdf', 'email_terkirim',
     ];
 
     protected $useTimestamps = true;

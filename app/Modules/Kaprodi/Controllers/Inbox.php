@@ -66,6 +66,41 @@ class Inbox extends BaseController
         return redirect()->to('/dashboard/kaprodi/inbox')->with('success', 'Pengajuan diteruskan ke Dekan.');
     }
 
+    /** POST /dashboard/kaprodi/batch-approve */
+    public function batchApprove()
+    {
+        $ids = (array) $this->request->getPost('ids');
+        if (empty($ids)) {
+            return redirect()->to('/dashboard/kaprodi/inbox')->with('error', 'Tidak ada pengajuan yang dipilih.');
+        }
+
+        $count = 0;
+        foreach ($ids as $id) {
+            $pengajuan = $this->model->getDetailWithLogs($id);
+            if ($pengajuan && $pengajuan['status'] === 'MENUNGGU_KAPRODI') {
+                $this->model->approve(
+                    $id,
+                    session('user_id'),
+                    session('nama'),
+                    'KAPRODI',
+                    'MENUNGGU_DEKAN',
+                    'Batch persetujuan akademik oleh Kaprodi'
+                );
+
+                $this->model->notifMahasiswa(
+                    $pengajuan['mahasiswa_id'],
+                    'Disetujui Kaprodi',
+                    'Pengajuan kamu telah disetujui Kaprodi dan diteruskan ke Dekan.',
+                    $id
+                );
+                $count++;
+            }
+        }
+
+        return redirect()->to('/dashboard/kaprodi/inbox')
+                         ->with('success', $count . ' pengajuan berhasil disetujui dan diteruskan ke Dekan.');
+    }
+
     public function tolak(string $id)
     {
         $pengajuan = $this->model->getDetailWithLogs($id);
