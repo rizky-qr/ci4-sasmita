@@ -27,11 +27,16 @@ class Inbox extends BaseController
     public function selesai()
     {
         return view('App\Modules\Dekan\Views\v_inbox', [
-            'title'  => 'Pengajuan Selesai',
+            'title'  => 'Surat Selesai Ditandatangani',
             'tab'    => 'selesai',
             'daftar' => $this->model->getAll('SELESAI'),
             'user'   => session()->get(),
         ]);
+    }
+
+    public function riwayat()
+    {
+        return $this->selesai();
     }
 
     public function detail(string $id)

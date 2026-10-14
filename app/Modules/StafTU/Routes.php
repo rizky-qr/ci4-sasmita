@@ -14,5 +14,5 @@ $routes->group('dashboard/staf-tu', [
     $routes->get('diproses',               'Inbox::diproses');
     $routes->get('ditolak',                'Inbox::ditolak');
     $routes->get('semua',                  'Inbox::semua');
-    $routes->get('mitra',                  'Inbox::index');
+    $routes->get('mitra',                  'Inbox::mitra');
 });

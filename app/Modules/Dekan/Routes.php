@@ -11,5 +11,6 @@ $routes->group('dashboard/dekan', [
     $routes->post('setujui/(:segment)',     'Inbox::setujui/$1');
     $routes->post('tolak/(:segment)',       'Inbox::tolak/$1');
     $routes->get('selesai',                'Inbox::selesai');
+    $routes->get('riwayat',                'Inbox::selesai');
     $routes->get('laporan',                'Laporan::index');
 });

@@ -63,6 +63,18 @@ class Inbox extends BaseController
         ]);
     }
 
+    /** GET /dashboard/staf-tu/mitra */
+    public function mitra()
+    {
+        $db = \Config\Database::connect();
+        $mitra = $db->table('tempat_mitra')->orderBy('created_at', 'DESC')->get()->getResultArray();
+        return view('App\Modules\Admin\Views\v_tempat_mitra', [
+            'title' => 'Daftar Tempat Mitra',
+            'mitra' => $mitra,
+            'user'  => session()->get(),
+        ]);
+    }
+
     /** GET /dashboard/staf-tu/detail/{id} */
     public function detail(string $id)
     {

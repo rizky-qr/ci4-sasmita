@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 $sidebarNav = '
 <span class="nav-section-label">Menu</span>
 <a href="/dashboard/dekan" class="nav-item"><span class="nav-icon">🏠</span> Dashboard</a>
@@ -13,8 +13,8 @@ require APPPATH . 'Views/partials/status_helpers.php';
 ob_start();
 ?>
 <div style="display:flex;gap:.5rem;margin-bottom:1.25rem;border-bottom:1px solid var(--border);padding-bottom:.75rem">
-    <a href="/dashboard/dekan/inbox"   class="btn <?= $tab==='menunggu'?'btn-primary':'btn-outline' ?> btn-sm">Menunggu</a>
-    <a href="/dashboard/dekan/selesai" class="btn <?= $tab==='selesai'?'btn-primary':'btn-outline'  ?> btn-sm">Selesai</a>
+    <a href="/dashboard/dekan/inbox"   class="btn <?= $tab==='menunggu'?'btn-primary':'btn-outline' ?> btn-sm">Menunggu Pengesahan</a>
+    <a href="/dashboard/dekan/riwayat" class="btn <?= in_array($tab, ['selesai', 'riwayat']) ? 'btn-primary' : 'btn-outline' ?> btn-sm">Surat Selesai</a>
 </div>
 <div class="card">
     <div class="card-header">
