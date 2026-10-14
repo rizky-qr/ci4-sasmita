@@ -22,6 +22,15 @@ class Inbox extends BaseController
     /** GET /dashboard/staf-tu/inbox — Pengajuan menunggu verifikasi */
     public function index()
     {
+        $status = $this->request->getGet('status');
+        if ($status === 'MENUNGGU_KAPRODI') {
+            return redirect()->to('/dashboard/staf-tu/diproses');
+        } elseif ($status === 'DITOLAK') {
+            return redirect()->to('/dashboard/staf-tu/ditolak');
+        } elseif ($status === 'ALL') {
+            return redirect()->to('/dashboard/staf-tu/semua');
+        }
+
         return view('App\Modules\StafTU\Views\v_inbox', [
             'title'    => 'Inbox — Menunggu Verifikasi',
             'tab'      => 'menunggu',

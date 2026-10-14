@@ -171,19 +171,19 @@ $renderBadge = function(int $count, string $type = 'pending', string $title = ''
     </a>
 
     <div class="nav-section-label">Administrasi Surat</div>
-    <a href="/dashboard/staf-tu/inbox" class="nav-item<?= ($isMatch('staf-tu/inbox') && !isset($_GET['status']) || $isMatch('staf-tu/detail')) ? ' active' : '' ?>">
+    <a href="/dashboard/staf-tu/inbox" class="nav-item<?= ($isExact('dashboard/staf-tu/inbox') || $isMatch('staf-tu/detail')) ? ' active' : '' ?>">
         <span class="nav-icon">📥</span> <span>Inbox Pengajuan</span>
         <?= $renderBadge($pendingInboxCount, 'pending', $pendingInboxCount . ' Berkas Belum Disetujui', 'Menunggu verifikasi Staf TU Prodi (Klik untuk buka)', '⏳', true) ?>
     </a>
-    <a href="/dashboard/staf-tu/inbox?status=MENUNGGU_KAPRODI" class="nav-item<?= ($uri === 'dashboard/staf-tu/inbox' && isset($_GET['status']) && $_GET['status'] === 'MENUNGGU_KAPRODI') ? ' active' : '' ?>">
+    <a href="/dashboard/staf-tu/diproses" class="nav-item<?= $isExact('dashboard/staf-tu/diproses') ?>">
         <span class="nav-icon">⏳</span> <span>Pengajuan Diproses</span>
         <?= $renderBadge($diprosesCount, 'info', $diprosesCount . ' Berkas Sedang Berjalan', 'Sedang ditinjau oleh Kaprodi / Dekan', '⏳') ?>
     </a>
-    <a href="/dashboard/staf-tu/inbox?status=DITOLAK" class="nav-item<?= ($uri === 'dashboard/staf-tu/inbox' && isset($_GET['status']) && $_GET['status'] === 'DITOLAK') ? ' active' : '' ?>">
+    <a href="/dashboard/staf-tu/ditolak" class="nav-item<?= $isExact('dashboard/staf-tu/ditolak') ?>">
         <span class="nav-icon">❌</span> <span>Pengajuan Ditolak</span>
         <?= $renderBadge($ditolakCount, 'muted', $ditolakCount . ' Berkas Ditolak', 'Arsip pengajuan yang ditolak', '❌') ?>
     </a>
-    <a href="/dashboard/staf-tu/inbox?status=ALL" class="nav-item<?= ($uri === 'dashboard/staf-tu/inbox' && isset($_GET['status']) && $_GET['status'] === 'ALL') ? ' active' : '' ?>">
+    <a href="/dashboard/staf-tu/semua" class="nav-item<?= $isExact('dashboard/staf-tu/semua') ?>">
         <span class="nav-icon">📁</span> <span>Semua Pengajuan</span>
     </a>
     <a href="/dashboard/staf-tu/mitra" class="nav-item<?= $isMatch('staf-tu/mitra') ?>">

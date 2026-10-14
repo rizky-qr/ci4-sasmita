@@ -1258,14 +1258,14 @@ if ($currentUserId) {
             <span class="m-icon">🏠</span>
             <span>Beranda</span>
         </a>
-        <a href="/dashboard/staf-tu/inbox" class="mobile-nav-item <?= (strpos($currentUri, 'inbox') !== false && !isset($_GET['status'])) ? 'active' : '' ?>">
+        <a href="/dashboard/staf-tu/inbox" class="mobile-nav-item <?= ($currentUri === 'dashboard/staf-tu/inbox' || strpos($currentUri, 'staf-tu/detail') !== false) ? 'active' : '' ?>">
             <span class="m-icon">📥</span>
             <span>Inbox</span>
             <?php if ($pendingInboxCount > 0): ?>
                 <span class="mobile-nav-badge pending"><?= $pendingInboxCount ?></span>
             <?php endif ?>
         </a>
-        <a href="/dashboard/staf-tu/inbox?status=MENUNGGU_KAPRODI" class="mobile-nav-item <?= (isset($_GET['status']) && $_GET['status'] === 'MENUNGGU_KAPRODI') ? 'active' : '' ?>">
+        <a href="/dashboard/staf-tu/diproses" class="mobile-nav-item <?= ($currentUri === 'dashboard/staf-tu/diproses') ? 'active' : '' ?>">
             <span class="m-icon">⏳</span>
             <span>Diproses</span>
         </a>
